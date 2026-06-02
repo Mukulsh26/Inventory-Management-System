@@ -1,82 +1,55 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import api from "../services/api";
 
-export default function Orders() {
-  const [orders, setOrders] = useState([]);
-  const [loading, setLoading] = useState(true);
+export default function Orders({
+  orders,
+  refreshAll,
+}) {
   const [showModal, setShowModal] = useState(false);
 
   const [customerId, setCustomerId] = useState("");
   const [productId, setProductId] = useState("");
   const [quantity, setQuantity] = useState("");
 
-  const fetchOrders = async () => {
-    try {
-      setLoading(true);
-
-      const res = await api.get("/orders");
-
-      setOrders(res.data);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchOrders();
-  }, []);
-
   const createOrder = async () => {
-    try {
-      setLoading(true);
+  try {
+    await api.post("/orders", {
+      customer_id: Number(customerId),
+      product_id: Number(productId),
+      quantity: Number(quantity),
+    });
 
-      await api.post("/orders", {
-        customer_id: Number(customerId),
-        product_id: Number(productId),
-        quantity: Number(quantity),
-      });
+    setCustomerId("");
+    setProductId("");
+    setQuantity("");
 
-      setCustomerId("");
-      setProductId("");
-      setQuantity("");
+    setShowModal(false);
 
-      setShowModal(false);
+    await refreshAll();
 
-      await fetchOrders();
-    } catch {
-      alert("Unable to create order");
-      setLoading(false);
-    }
-  };
+    alert("Order created successfully");
+  } catch (err) {
+    const message =
+      err?.response?.data?.detail ||
+      "Unable to create order";
+
+    if (message === "Insufficient inventory") {
+  alert("❌ No stock available for this product");
+} else {
+  alert(message);
+}
+  }
+};
 
   const deleteOrder = async (id) => {
     try {
-      setLoading(true);
-
       await api.delete(`/orders/${id}`);
 
-      await fetchOrders();
+      await refreshAll();
     } catch {
       alert("Unable to delete order");
-      setLoading(false);
     }
   };
-
-  if (loading) {
-    return (
-      <div className="column">
-        <div className="column-header">
-          <h2>🛒 Orders</h2>
-        </div>
-
-        <div className="loader-container">
-          <div className="loader"></div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="column">

@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import api from "../services/api";
 
-export default function Products() {
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
+export default function Products({
+  products,
+  refreshAll,
+}) {
   const [showModal, setShowModal] = useState(false);
 
   const [name, setName] = useState("");
@@ -11,28 +12,8 @@ export default function Products() {
   const [price, setPrice] = useState("");
   const [stock, setStock] = useState("");
 
-  const fetchProducts = async () => {
-    try {
-      setLoading(true);
-
-      const res = await api.get("/products");
-
-      setProducts(res.data);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchProducts();
-  }, []);
-
   const addProduct = async () => {
     try {
-      setLoading(true);
-
       await api.post("/products", {
         name,
         sku,
@@ -47,39 +28,21 @@ export default function Products() {
 
       setShowModal(false);
 
-      await fetchProducts();
+      await refreshAll();
     } catch {
       alert("Unable to create product");
-      setLoading(false);
     }
   };
 
   const deleteProduct = async (id) => {
     try {
-      setLoading(true);
-
       await api.delete(`/products/${id}`);
 
-      await fetchProducts();
+      await refreshAll();
     } catch {
       alert("Unable to delete product");
-      setLoading(false);
     }
   };
-
-  if (loading) {
-    return (
-      <div className="column">
-        <div className="column-header">
-          <h2>📦 Products</h2>
-        </div>
-
-        <div className="loader-container">
-          <div className="loader"></div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="column">
@@ -99,7 +62,7 @@ export default function Products() {
           <h4>{p.name}</h4>
 
           <p>
-          <strong>ID:</strong> {p.id}
+            <strong>ID:</strong> {p.id}
           </p>
 
           <p>

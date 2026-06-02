@@ -1,37 +1,18 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import api from "../services/api";
 
-export default function Customers() {
-  const [customers, setCustomers] = useState([]);
-  const [loading, setLoading] = useState(true);
+export default function Customers({
+  customers,
+  refreshAll,
+}) {
   const [showModal, setShowModal] = useState(false);
 
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
 
-  const fetchCustomers = async () => {
-    try {
-      setLoading(true);
-
-      const res = await api.get("/customers");
-
-      setCustomers(res.data);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchCustomers();
-  }, []);
-
   const addCustomer = async () => {
     try {
-      setLoading(true);
-
       await api.post("/customers", {
         full_name: fullName,
         email,
@@ -44,39 +25,21 @@ export default function Customers() {
 
       setShowModal(false);
 
-      await fetchCustomers();
+      await refreshAll();
     } catch {
       alert("Unable to create customer");
-      setLoading(false);
     }
   };
 
   const deleteCustomer = async (id) => {
     try {
-      setLoading(true);
-
       await api.delete(`/customers/${id}`);
 
-      await fetchCustomers();
+      await refreshAll();
     } catch {
       alert("Unable to delete customer");
-      setLoading(false);
     }
   };
-
-  if (loading) {
-    return (
-      <div className="column">
-        <div className="column-header">
-          <h2>👤 Customers</h2>
-        </div>
-
-        <div className="loader-container">
-          <div className="loader"></div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="column">
@@ -96,9 +59,9 @@ export default function Customers() {
           <h4>{c.full_name}</h4>
 
           <p>
-            <strong>ID: </strong> {c.id}
+            <strong>ID:</strong> {c.id}
           </p>
-          
+
           <p>
             <strong>Email:</strong> {c.email}
           </p>
