@@ -6,6 +6,7 @@ export default function Products({
   refreshAll,
 }) {
   const [showModal, setShowModal] = useState(false);
+  const [editingId, setEditingId] = useState(null);
 
   const [name, setName] = useState("");
   const [sku, setSku] = useState("");
@@ -33,6 +34,41 @@ export default function Products({
       alert("Unable to create product");
     }
   };
+
+  const updateProduct = async () => {
+  try {
+    await api.put(`/products/${editingId}`, {
+      name,
+      sku,
+      price: Number(price),
+      stock_quantity: Number(stock),
+    });
+
+    setEditingId(null);
+
+    setName("");
+    setSku("");
+    setPrice("");
+    setStock("");
+
+    setShowModal(false);
+
+    await refreshAll();
+  } catch {
+    alert("Unable to update product");
+  }
+};
+
+  const handleEdit = (product) => {
+  setEditingId(product.id);
+
+  setName(product.name);
+  setSku(product.sku);
+  setPrice(product.price);
+  setStock(product.stock_quantity);
+
+  setShowModal(true);
+};
 
   const deleteProduct = async (id) => {
     try {
@@ -77,25 +113,45 @@ export default function Products({
             <strong>Stock:</strong> {p.stock_quantity}
           </p>
 
-          <button
-            className="btn btn-danger"
-            onClick={() => deleteProduct(p.id)}
-          >
-            Delete
-          </button>
+          <div
+  style={{
+    display: "flex",
+    gap: "10px",
+    marginTop: "10px",
+  }}
+>
+  <button
+    className="btn btn-primary"
+    onClick={() => handleEdit(p)}
+  >
+    Edit
+  </button>
+
+  <button
+    className="btn btn-danger"
+    onClick={() => deleteProduct(p.id)}
+  >
+    Delete
+  </button>
+</div>
         </div>
       ))}
 
       {showModal && (
-        <div
-          className="modal-overlay"
-          onClick={() => setShowModal(false)}
-        >
+       <div
+  className="modal-overlay"
+  onClick={() => {
+    setEditingId(null);
+    setShowModal(false);
+  }}
+>
           <div
             className="modal"
             onClick={(e) => e.stopPropagation()}
           >
-            <h3>Add Product</h3>
+           <h3>
+  {editingId ? "Edit Product" : "Add Product"}
+</h3>
 
             <input
               placeholder="Product Name"
@@ -122,19 +178,28 @@ export default function Products({
             />
 
             <div className="modal-actions">
-              <button
-                className="btn"
-                onClick={() => setShowModal(false)}
-              >
-                Cancel
-              </button>
+             <button
+  className="btn"
+  onClick={() => {
+    setEditingId(null);
+    setShowModal(false);
+  }}
+>
+  Cancel
+</button>
 
-              <button
-                className="btn btn-primary"
-                onClick={addProduct}
-              >
-                Save Product
-              </button>
+             <button
+  className="btn btn-primary"
+  onClick={
+    editingId
+      ? updateProduct
+      : addProduct
+  }
+>
+  {editingId
+    ? "Update Product"
+    : "Save Product"}
+</button>
             </div>
           </div>
         </div>
