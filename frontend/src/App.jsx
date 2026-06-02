@@ -1,21 +1,20 @@
+import "./App.css";
 import Products from "./pages/Products";
 import Customers from "./pages/Customers";
 import Orders from "./pages/Orders";
 
 function App() {
   return (
-    <div style={{ padding: "20px" }}>
-      <h1>Inventory Management System</h1>
+    <div className="dashboard">
+      <h1 className="dashboard-title">
+        Inventory Management System
+      </h1>
 
-      <Products />
-
-      <hr />
-
-      <Customers />
-
-      <hr />
-
-      <Orders />
+      <div className="dashboard-grid">
+        <Products />
+        <Customers />
+        <Orders />
+      </div>
     </div>
   );
 }
