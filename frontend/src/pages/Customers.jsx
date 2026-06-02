@@ -96,6 +96,10 @@ export default function Customers() {
           <h4>{c.full_name}</h4>
 
           <p>
+            <strong>ID: </strong> {c.id}
+          </p>
+          
+          <p>
             <strong>Email:</strong> {c.email}
           </p>
 

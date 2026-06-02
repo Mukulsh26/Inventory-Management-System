@@ -99,6 +99,10 @@ export default function Products() {
           <h4>{p.name}</h4>
 
           <p>
+          <strong>ID:</strong> {p.id}
+          </p>
+
+          <p>
             <strong>SKU:</strong> {p.sku}
           </p>
 
